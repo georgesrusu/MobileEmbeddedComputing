@@ -1,5 +1,5 @@
 *
-
+!.gitignore
 !RootNode/Makefile
 !RootNode/rootNode.c
 !SensorNode/Makefile
