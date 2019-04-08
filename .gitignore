@@ -1,7 +1,8 @@
 *
-!.gitignore
-!RootNode/Makefile
-!RootNode/rootNode.c
+
+! .gitignore
+! RootNode/Makefile
+! RootNode/rootNode.c
 !SensorNode/Makefile
 !SensorNode/sensorNode.c
 !Utils-code/*
