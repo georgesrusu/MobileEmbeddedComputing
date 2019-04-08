@@ -1,1 +1,10 @@
-.DS_Store
+*
+
+!RootNode/Makefile
+!RootNode/rootNode.c
+!SensorNode/Makefile
+!SensorNode/sensorNode.c
+!Utils-code/*
+
+!project.pdf
+!README.md
