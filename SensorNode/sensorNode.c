@@ -32,13 +32,6 @@ static void broadcastReceiver(struct broadcast_conn *c, const linkaddr_t *from){
     struct discovery_packet *pkt;
     pkt=packetbuf_dataptr();
 
-    if (from->u8 != parentAddr.u8){
-        broadcastPacketWithoutParentCounter++;
-    }
-    else{
-        broadcastPacketWithoutParentCounter=0;
-    } 
-
     if (rank>0 && pkt->type == DISCOVERY_HELLO){
         printf("broadcast DISCOVERY_HELLO message received from %d.%d\n",from->u8[0], from->u8[1]);
         //DISCOVERY RESPONSE en UNICAST
@@ -63,7 +56,9 @@ PROCESS_THREAD(broadcastProcess, ev, data){
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         //Parent Lost
         if (broadcastPacketWithoutParentCounter>=MAX_BROADCAST_PACKET_WITHOUT_PARENT){
+            printf("RESET PARENT");
             rank=0;
+            parentAddr.u8[0]=0;
         }
 
 
@@ -86,18 +81,27 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
     pkt=packetbuf_dataptr();
     if (pkt->type ==DISCOVERY_RESPONSE){
         printf("broadcast DISCOVERY_RESPONSE message received from %d.%d WITH RANK %d\n",from->u8[0], from->u8[1],(int)pkt->rank);
-        
+        //If Motes is moved
+        if (from->u8[0] != parentAddr.u8[0]){
+            printf("NOT FROM PARENT");
+            broadcastPacketWithoutParentCounter++;
+        }
+        else{
+            printf("FROM PARENT");
+            broadcastPacketWithoutParentCounter=0;
+        } 
+
         if (rank==0){
             printf("New Parent found with RANK %d, Parent is %d,%d\n",(int)pkt->rank,from->u8[0], from->u8[1]);
             rank=pkt->rank;
-            parentAddr=from->u8[0];
+            parentAddr.u8[0]=from->u8[0];
             parentRank=rank;
             rank++;
         }
         else if ((pkt->rank)+1 < rank){
             printf("Parent Changed found with RANK %d, Parent is %d,%d\n",(int)pkt->rank,from->u8[0], from->u8[1]);
             rank=pkt->rank;
-            parentAddr=from->u8;
+            parentAddr.u8[0]=from->u8[0];
             parentRank=rank;
             rank++;
         }
