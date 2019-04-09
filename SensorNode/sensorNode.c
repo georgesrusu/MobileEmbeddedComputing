@@ -55,6 +55,7 @@ PROCESS_THREAD(broadcastProcess, ev, data){
         etimer_set(&et, CLOCK_SECOND * 4 + random_rand() % (CLOCK_SECOND * 4));
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         //Parent Lost
+        //TODO CHANGE TJAT
         if (broadcastPacketWithoutParentCounter>=MAX_BROADCAST_PACKET_WITHOUT_PARENT){
             printf("RESET PARENT");
             rank=0;
@@ -80,14 +81,15 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
     struct discovery_packet *pkt;
     pkt=packetbuf_dataptr();
     if (pkt->type ==DISCOVERY_RESPONSE){
-        printf("broadcast DISCOVERY_RESPONSE message received from %d.%d WITH RANK %d\n",from->u8[0], from->u8[1],(int)pkt->rank);
+        printf("RUNICAST DISCOVERY_RESPONSE message received from %d.%d WITH RANK %d\n",from->u8[0], from->u8[1],(int)pkt->rank);
         //If Motes is moved
+         //TODO CHANGE TJAT
         if (from->u8[0] != parentAddr.u8[0]){
-            printf("NOT FROM PARENT");
+            printf("NOT FROM PARENT\n");
             broadcastPacketWithoutParentCounter++;
         }
         else{
-            printf("FROM PARENT");
+            printf("FROM PARENT\n");
             broadcastPacketWithoutParentCounter=0;
         } 
 
@@ -120,12 +122,10 @@ static const struct runicast_callbacks runicastCallback = {runicastReceiver, run
 PROCESS_THREAD(runicastProcess, ev, data){
     PROCESS_EXITHANDLER(runicast_close(&runicastConnection);)
     PROCESS_BEGIN();
-
-    // We need to open the connection to be able to process received runicast packets
     runicast_open(&runicastConnection, 146, &runicastCallback);
 
     while(1) {
-        // The root doesn't need to send any runicast packets periodically
+        //TODO Parent presence check
         PROCESS_YIELD();
     }
 
