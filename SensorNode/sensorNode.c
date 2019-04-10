@@ -80,7 +80,9 @@ PROCESS_THREAD(broadcastProcess, ev, data){
 /*-------------------------------Runicast Thread Definition --------------------------------------------*/
 static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, uint8_t seqno){
     struct packet *pkt;
+    struct data_packet *data_pkt;
     pkt=packetbuf_dataptr();
+    data_pkt=packetbuf_dataptr();
     if (pkt->type ==DISCOVERY_RESPONSE){
         //printf("RUNICAST DISCOVERY_RESPONSE message received from %d.%d WITH RANK %d\n",from->u8[0], from->u8[1],(int)pkt->rank);
         if (rank==0){
@@ -108,16 +110,16 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
     }
     else if (pkt->type == ALIVE_RESPONSE){
         printf("RUNICAST ALIVE_RESPONSE message received from %d.%d \n",from->u8[0], from->u8[1]);
-        if (pkt->rank ==0){
+        if (pkt->rank == 0){
             printf("RESETPARENTFROM ALIVE pACKET\n");
             rank=0;
         }
         ParentAliveCounter=0;
     }
-    else if(pkt->type == SENSOR_DATA){
+    else if(data_pkt->type == SENSOR_DATA){
         if (rank>1){
             printf("Retransmission\n");
-            packetbuf_copyfrom(pkt, sizeof(struct data_packet));
+            packetbuf_copyfrom(data_pkt, sizeof(struct data_packet));
             runicast_send(&runicastConnection, &parentAddr,MAX_TRANSMISSION_PACKET);
         }
     }
