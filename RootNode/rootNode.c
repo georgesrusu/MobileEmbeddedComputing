@@ -78,7 +78,7 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
         pkt_response.type=ALIVE_RESPONSE;
         pkt_response.rank=rank;
         packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
-        runicast_send(&runicastConnection, from,MAX_TRANSMISSION_PACKET);
+        runicast_send(c, from,MAX_TRANSMISSION_PACKET);
     }
     else if(data_pkt->type == SENSOR_DATA){
         //packetbuf_copyfrom(&pkt, sizeof(struct data_packet));

@@ -106,7 +106,7 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
         pkt_response.type=ALIVE_RESPONSE;
         pkt_response.rank=rank;
         packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
-        runicast_send(&runicastConnection, from,MAX_TRANSMISSION_PACKET);
+        runicast_send(c, from,MAX_TRANSMISSION_PACKET);
     }
     else if (pkt->type == ALIVE_RESPONSE){
         printf("RUNICAST ALIVE_RESPONSE message received from %d.%d \n",from->u8[0], from->u8[1]);
@@ -120,7 +120,7 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
         if (rank>1){
             printf("Retransmission\n");
             packetbuf_copyfrom(data_pkt, sizeof(struct data_packet));
-            runicast_send(&runicastConnection, &parentAddr,MAX_TRANSMISSION_PACKET);
+            runicast_send(c, &parentAddr,MAX_TRANSMISSION_PACKET);
         }
     }
 }
