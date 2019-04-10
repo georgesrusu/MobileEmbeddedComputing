@@ -29,7 +29,7 @@ static void broadcastReceive(struct broadcast_conn *c, const linkaddr_t *from){
     pkt=packetbuf_dataptr();
 
     if (pkt->type == DISCOVERY_REQUEST){
-        //printf("broadcast DISCOVERY_REQUEST message received from %d.%d\n",from->u8[0], from->u8[1]);
+        printf("broadcast DISCOVERY_REQUEST message received from %d.%d\n",from->u8[0], from->u8[1]);
         //DISCOVERY RESPONSE en UNICAST
         struct packet pkt_response;
         pkt_response.type=DISCOVERY_RESPONSE;
