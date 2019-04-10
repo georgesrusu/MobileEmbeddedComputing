@@ -69,7 +69,9 @@ PROCESS_THREAD(broadcastProcess, ev, data){
 /*-------------------------------Runicast Thread Definition --------------------------------------------*/
 static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, uint8_t seqno){
     struct packet *pkt;
+    struct data_packet *data_pkt;
     pkt=packetbuf_dataptr();
+    data_pkt=packetbuf_dataptr();
     if (pkt->type ==ALIVE_REQUEST){
         printf("RUNICAST ALIVE_REQUEST message received from %d.%d \n",from->u8[0], from->u8[1]);
         struct packet pkt_response;
@@ -77,6 +79,12 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
         pkt_response.rank=rank;
         packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
         runicast_send(&runicastConnection, from,MAX_TRANSMISSION_PACKET);
+    }
+    else if(data_pkt->type == SENSOR_DATA){
+        //packetbuf_copyfrom(&pkt, sizeof(struct data_packet));
+        //runicast_send(&runicastConnection, &parentAddr,MAX_TRANSMISSION_PACKET);
+        printf("Received Sensor Data from nodeID %d with rank %d\n",data_pkt->nodeSrc,data_pkt->nodeRank);
+        printf("DATA received : temperature=%d and other data= %d\n",data_pkt->dataTemp,data_pkt->dataOther);
     }
 }
 
