@@ -25,16 +25,16 @@ AUTOSTART_PROCESSES(&broadcastProcess,&runicastProcess);
 /*-------------------------------BroadCast Thread Definition --------------------------------------------*/
 
 static void broadcastReceive(struct broadcast_conn *c, const linkaddr_t *from){
-    struct discovery_packet *pkt;
+    struct packet *pkt;
     pkt=packetbuf_dataptr();
 
-    if (pkt->type == DISCOVERY_HELLO){
-        printf("broadcast DISCOVERY_HELLO message received from %d.%d\n",from->u8[0], from->u8[1]);
+    if (pkt->type == DISCOVERY_REQUEST){
+        //printf("broadcast DISCOVERY_REQUEST message received from %d.%d\n",from->u8[0], from->u8[1]);
         //DISCOVERY RESPONSE en UNICAST
-        struct discovery_packet pkt_response;
+        struct packet pkt_response;
         pkt_response.type=DISCOVERY_RESPONSE;
         pkt_response.rank=rank;
-        packetbuf_copyfrom(&pkt_response, sizeof(struct discovery_packet));
+        packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
         runicast_send(&runicastConnection, from,MAX_TRANSMISSION_PACKET);
     }
     
@@ -68,7 +68,16 @@ PROCESS_THREAD(broadcastProcess, ev, data){
 
 /*-------------------------------Runicast Thread Definition --------------------------------------------*/
 static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, uint8_t seqno){
-    
+    struct packet *pkt;
+    pkt=packetbuf_dataptr();
+    if (pkt->type ==ALIVE_REQUEST){
+        printf("RUNICAST ALIVE_REQUEST message received from %d.%d \n",from->u8[0], from->u8[1]);
+        struct packet pkt_response;
+        pkt_response.type=ALIVE_RESPONSE;
+        pkt_response.rank=rank;
+        packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
+        runicast_send(&runicastConnection, from,MAX_TRANSMISSION_PACKET);
+    }
 }
 
 static void runicastSender(struct runicast_conn *c, const linkaddr_t *to, uint8_t retransmissions){
