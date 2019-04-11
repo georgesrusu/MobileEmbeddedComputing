@@ -13,6 +13,7 @@ enum messageTypes{
 struct packet{
     uint8_t type;
     uint16_t rank;
+    uint8_t mode;
 
 };
 
@@ -24,4 +25,8 @@ struct data_packet{
     int16_t dataOther; //to be changed
 };
 
+enum dataSendingModes{
+    DATA_PERIODICALLY,
+    DATA_ON_CHANGE,
+};
 #endif

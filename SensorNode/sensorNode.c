@@ -11,8 +11,11 @@
 #include <stdio.h>
 #include "../Common/messageTypes.h"
 #include "node-id.h"
+#include "dev/tmp102.h"
+
 #define MAX_TRANSMISSION_PACKET 4
 #define MAX_PACKET_PARENT_ALIVE 2
+
 
 /*-------------------------------Variable Definition -------------------------------------*/
 static struct broadcast_conn broadcastConnection;
@@ -22,7 +25,9 @@ static uint16_t parentRank;
 static linkaddr_t parentAddr;
 static int ParentAliveCounter=0;
 static int randomSensorData=1;
-
+static int mode;
+static int8_t oldDataTemp=0;
+static int16_t oldDataOther=0; 
 /*-------------------------------Processes Definition -------------------------------------*/
 PROCESS(broadcastProcess, "Broadcast communications");
 PROCESS(runicastProcess, "Runicast communications");
@@ -35,11 +40,12 @@ static void broadcastReceiver(struct broadcast_conn *c, const linkaddr_t *from){
     pkt=packetbuf_dataptr();
 
     if (rank>0 && pkt->type == DISCOVERY_REQUEST){
-        //printf("broadcast DISCOVERY_REQUEST message received from %d.%d\n",from->u8[0], from->u8[1]);
+        printf("broadcast DISCOVERY_REQUEST message received from %d.%d\n",from->u8[0], from->u8[1]);
         //DISCOVERY RESPONSE en UNICAST
         struct packet pkt_response;
         pkt_response.type=DISCOVERY_RESPONSE;
         pkt_response.rank=rank;
+        pkt_response.mode=mode;
         packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
         runicast_send(&runicastConnection, from,MAX_TRANSMISSION_PACKET);
     }
@@ -81,6 +87,7 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
             rank=pkt->rank;
             parentAddr=*from;
             parentRank=rank;
+            mode=pkt->mode;
             rank++;
         }
         else if ((pkt->rank)+1 < rank){
@@ -88,6 +95,7 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
             rank=pkt->rank;
             parentAddr=*from;
             parentRank=rank;
+            mode=pkt->mode;
             rank++;
         }
     }
@@ -96,11 +104,13 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
         struct packet pkt_response;
         pkt_response.type=ALIVE_RESPONSE;
         pkt_response.rank=rank;
+        pkt_response.mode=mode;
         packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
         runicast_send(c, from,MAX_TRANSMISSION_PACKET);
     }
     else if (pkt->type == ALIVE_RESPONSE){
         printf("RUNICAST ALIVE_RESPONSE message received from %d.%d \n",from->u8[0], from->u8[1]);
+        mode=pkt->mode;
         if (pkt->rank == 0 || pkt->rank > rank){
             printf("RESETPARENTFROM ALIVE pACKET\n");
             rank=0;
@@ -165,27 +175,48 @@ PROCESS_THREAD(getDataProcess, ev, data){
     PROCESS_BEGIN();
     broadcast_open(&broadcastConnection, 129, &broadcastCallback);
     while(1) {
-        /* Delay 2-4 seconds */
         etimer_set(&et, CLOCK_SECOND * 4 + random_rand() % (CLOCK_SECOND * 4));
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         if (rank>1){
             struct data_packet data_pkt;
+            data_pkt.type=SENSOR_DATA;
+            data_pkt.nodeSrc=node_id;
+            data_pkt.nodeRank=rank;
             if (randomSensorData){
-                data_pkt.type=SENSOR_DATA;
-                data_pkt.nodeSrc=node_id;
-                data_pkt.nodeRank=rank;
-                data_pkt.dataTemp=random_rand()%128; //datatemp on 8 bit
+                data_pkt.dataTemp= random_rand()%128; //datatemp on 8 bit
                 data_pkt.dataOther=random_rand()%256; //data on 16 bit
+                //data_pkt.dataTemp= -26; //datatemp on 8 bit
+                //data_pkt.dataOther=10;
             }else{
                 printf("real hardware used\n");
+                data_pkt.dataTemp= tmp102_read_temp_raw(); //datatemp on 8 bit
+                data_pkt.dataOther=tmp102_read_temp_raw(); //data on 16 bit
                 //TODO complete for real hardware
             }
             //TODO Sender mode, periodical and differential
-
-       
-            printf("sent sensor data\n");
-            packetbuf_copyfrom(&data_pkt, sizeof(struct data_packet));
-            runicast_send(&runicastConnection, &parentAddr,MAX_TRANSMISSION_PACKET);
+            if (mode == DATA_PERIODICALLY){
+                /* Delay 2-4 seconds */
+                printf("MODE PERIODICALLY ACTIVATED\n");
+                
+                if (!runicast_is_transmitting(&runicastConnection)){
+                    printf("sent sensor data\n");
+                    packetbuf_copyfrom(&data_pkt, sizeof(struct data_packet));
+                    runicast_send(&runicastConnection, &parentAddr,MAX_TRANSMISSION_PACKET);
+                }
+            }
+            else if (mode == DATA_ON_CHANGE){
+                printf("MODE DIFFERENTIAL ACTIVATED\n");
+                if (oldDataTemp != data_pkt.dataTemp || oldDataOther != data_pkt.dataOther){
+                    printf("DATA DIFFERENTIAL\n");
+                    oldDataTemp=data_pkt.dataTemp;
+                    oldDataOther=data_pkt.dataOther;
+                    if (!runicast_is_transmitting(&runicastConnection)){
+                        printf("sent sensor data\n");
+                        packetbuf_copyfrom(&data_pkt, sizeof(struct data_packet));
+                        runicast_send(&runicastConnection, &parentAddr,MAX_TRANSMISSION_PACKET);
+                    }
+                }
+            }
         }
     }
     PROCESS_END();

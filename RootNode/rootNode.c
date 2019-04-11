@@ -17,7 +17,7 @@
 static struct broadcast_conn broadcastConnection;
 static struct runicast_conn runicastConnection;
 static uint16_t rank=1; //root has rank 1 always, to create the tree
-
+static int mode=DATA_PERIODICALLY; //default sending mode
 /*-------------------------------Processes Definition -------------------------------------*/
 PROCESS(broadcastProcess, "Broadcast communications");
 PROCESS(runicastProcess, "Runicast communications");
@@ -34,6 +34,7 @@ static void broadcastReceive(struct broadcast_conn *c, const linkaddr_t *from){
         struct packet pkt_response;
         pkt_response.type=DISCOVERY_RESPONSE;
         pkt_response.rank=rank;
+        pkt_response.mode=mode;
         packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
         runicast_send(&runicastConnection, from,MAX_TRANSMISSION_PACKET);
     }
@@ -77,6 +78,7 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
         struct packet pkt_response;
         pkt_response.type=ALIVE_RESPONSE;
         pkt_response.rank=rank;
+        pkt_response.mode=mode;
         packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
         runicast_send(c, from,MAX_TRANSMISSION_PACKET);
     }
