@@ -35,6 +35,8 @@ static void broadcastReceive(struct broadcast_conn *c, const linkaddr_t *from){
         pkt_response.type=DISCOVERY_RESPONSE;
         pkt_response.rank=rank;
         pkt_response.mode=mode;
+        int countTransmission=0;
+        while (runicast_is_transmitting(&runicastConnection) && ++countTransmission<MAX_TRANSMISSION_PACKET){}
         packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
         runicast_send(&runicastConnection, from,MAX_TRANSMISSION_PACKET);
     }
@@ -79,6 +81,8 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
         pkt_response.type=ALIVE_RESPONSE;
         pkt_response.rank=rank;
         pkt_response.mode=mode;
+        int countTransmission=0;
+        while (runicast_is_transmitting(&runicastConnection) && ++countTransmission<MAX_TRANSMISSION_PACKET){}
         packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
         runicast_send(c, from,MAX_TRANSMISSION_PACKET);
     }

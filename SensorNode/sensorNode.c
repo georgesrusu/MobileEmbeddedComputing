@@ -46,6 +46,8 @@ static void broadcastReceiver(struct broadcast_conn *c, const linkaddr_t *from){
         pkt_response.type=DISCOVERY_RESPONSE;
         pkt_response.rank=rank;
         pkt_response.mode=mode;
+        int countTransmission=0;
+        while (runicast_is_transmitting(&runicastConnection) && ++countTransmission<MAX_TRANSMISSION_PACKET){}
         packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
         runicast_send(&runicastConnection, from,MAX_TRANSMISSION_PACKET);
     }
@@ -105,6 +107,8 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
         pkt_response.type=ALIVE_RESPONSE;
         pkt_response.rank=rank;
         pkt_response.mode=mode;
+        int countTransmission=0;
+        while (runicast_is_transmitting(&runicastConnection) && ++countTransmission<MAX_TRANSMISSION_PACKET){}
         packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
         runicast_send(c, from,MAX_TRANSMISSION_PACKET);
     }
@@ -119,6 +123,8 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
     }
     else if(data_pkt->type == SENSOR_DATA){
         if (rank>1){
+            int countTransmission=0;
+            while (runicast_is_transmitting(&runicastConnection) && ++countTransmission<MAX_TRANSMISSION_PACKET){}
             printf("Retransmission\n");
             packetbuf_copyfrom(data_pkt, sizeof(struct data_packet));
             runicast_send(c, &parentAddr,MAX_TRANSMISSION_PACKET);
@@ -144,14 +150,16 @@ PROCESS_THREAD(runicastProcess, ev, data){
     while(1) {
   
         if (rank>1){
-            if (!runicast_is_transmitting(&runicastConnection)){
-                ParentAliveCounter++;
-                struct packet pkt;
-                pkt.type= ALIVE_REQUEST;
-                printf("ALIVE REQUEST SEND\n");
-                packetbuf_copyfrom(&pkt, sizeof(struct packet));
-                runicast_send(&runicastConnection, &parentAddr ,MAX_TRANSMISSION_PACKET);
-            }
+            //if (!runicast_is_transmitting(&runicastConnection)){
+            ParentAliveCounter++;
+            struct packet pkt;
+            pkt.type= ALIVE_REQUEST;
+            int countTransmission=0;
+            while (runicast_is_transmitting(&runicastConnection) && ++countTransmission<MAX_TRANSMISSION_PACKET){}
+            printf("ALIVE REQUEST SEND\n");
+            packetbuf_copyfrom(&pkt, sizeof(struct packet));
+            runicast_send(&runicastConnection, &parentAddr ,MAX_TRANSMISSION_PACKET);
+            //}
         }
         etimer_set(&et, CLOCK_SECOND * 3 + random_rand() % (CLOCK_SECOND * 2));
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
