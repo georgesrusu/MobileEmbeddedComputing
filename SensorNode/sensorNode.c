@@ -197,12 +197,11 @@ PROCESS_THREAD(getDataProcess, ev, data){
             if (mode == DATA_PERIODICALLY){
                 /* Delay 2-4 seconds */
                 printf("MODE PERIODICALLY ACTIVATED\n");
-                
-                if (!runicast_is_transmitting(&runicastConnection)){
-                    printf("sent sensor data\n");
-                    packetbuf_copyfrom(&data_pkt, sizeof(struct data_packet));
-                    runicast_send(&runicastConnection, &parentAddr,MAX_TRANSMISSION_PACKET);
-                }
+                int countTransmission=0;
+                while (runicast_is_transmitting(&runicastConnection) && ++countTransmission<MAX_TRANSMISSION_PACKET){}
+                printf("sent sensor data\n");
+                packetbuf_copyfrom(&data_pkt, sizeof(struct data_packet));
+                runicast_send(&runicastConnection, &parentAddr,MAX_TRANSMISSION_PACKET);
             }
             else if (mode == DATA_ON_CHANGE){
                 printf("MODE DIFFERENTIAL ACTIVATED\n");
@@ -210,11 +209,12 @@ PROCESS_THREAD(getDataProcess, ev, data){
                     printf("DATA DIFFERENTIAL\n");
                     oldDataTemp=data_pkt.dataTemp;
                     oldDataOther=data_pkt.dataOther;
-                    if (!runicast_is_transmitting(&runicastConnection)){
-                        printf("sent sensor data\n");
-                        packetbuf_copyfrom(&data_pkt, sizeof(struct data_packet));
-                        runicast_send(&runicastConnection, &parentAddr,MAX_TRANSMISSION_PACKET);
-                    }
+                    int countTransmission=0;
+                    while (runicast_is_transmitting(&runicastConnection) && ++countTransmission<MAX_TRANSMISSION_PACKET){}
+                    printf("sent sensor data\n");
+                    packetbuf_copyfrom(&data_pkt, sizeof(struct data_packet));
+                    runicast_send(&runicastConnection, &parentAddr,MAX_TRANSMISSION_PACKET);
+                    
                 }
             }
         }
