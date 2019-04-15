@@ -22,12 +22,16 @@ def subscribe(node="+",topic="+"):
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description='MQTT subscriber')
-    parser.add_argument('-n',help='nodes to subscribe')
-    parser.add_argument('-t',help='topics to subscribe')
+    parser.add_argument('-n',help='nodes to subscribe,ex: 1,2,3.If none -> all')
+    parser.add_argument('-t',help='topics to subscribe,ex: temperature,other. If none-> all')
     args = parser.parse_args()
- 
+    if args.n is not None:
+        nodeList=list(args.n.split(","))
+    else:
+        nodeList="+"
 
-    #    nodeList=[2,3]
-    #    topicList=["temperature"]
-        #subscribe(node=nodeList,topic=topicList)
-   #     subscribe()
+    if args.t is not None:
+        topicList=list(args.t.split(","))
+    else:
+        topicList="+"
+    subscribe(node=nodeList,topic=topicList)
