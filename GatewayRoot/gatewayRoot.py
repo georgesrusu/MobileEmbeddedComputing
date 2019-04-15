@@ -1,6 +1,7 @@
 from subprocess import *
 import os
-import time
+import io
+from time import *
 import threading
 import argparse
 
@@ -15,7 +16,11 @@ def console(threadName,process):
     
 def readFromRoot(serial):
     mode="1"
+    print(["make","login","TARGET=z1","MOTES="+serial])
     p = Popen(["make","login","TARGET=z1","MOTES="+serial], stdout = PIPE, stdin = PIPE)
+    sleep(1)
+    p.stdin.write("messageToRoot".encode("utf-8"))
+    p.stdin.flush()
     #p1 =Popen(["mosquitto_sub","-t","$SYS/broker/clients/active"], stdout = p.stdin, stdin = PIPE)
     print("To change mode just type 0 for DATA_ON_CHANGE and 1 DATA_PERIODICALLY \n")
     threading1 = threading.Thread(target=console,args=("console",p))
@@ -27,8 +32,10 @@ def readFromRoot(serial):
             mode=modeInput
             print("mode changed",mode)
             messageToRoot=("mode:"+str(mode)).encode("utf-8")
-            p.stdin.write("coucou".encode("utf-8"))
+            p.stdin.write(messageToRoot)
+            p.stdin.flush()
         line = p.stdout.readline()
+        #print(line)
         if line == '' and p.poll() != None:
             break
         if line[0:4]== b"DATA":

@@ -31,7 +31,7 @@ static void broadcastReceive(struct broadcast_conn *c, const linkaddr_t *from){
     pkt=packetbuf_dataptr();
 
     if (pkt->type == DISCOVERY_REQUEST){
-        printf("broadcast DISCOVERY_REQUEST message received from %d.%d\n",from->u8[0], from->u8[1]);
+        //printf("broadcast DISCOVERY_REQUEST message received from %d.%d\n",from->u8[0], from->u8[1]);
         //DISCOVERY RESPONSE en UNICAST
         struct packet pkt_response;
         pkt_response.type=DISCOVERY_RESPONSE;
@@ -78,7 +78,7 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
     pkt=packetbuf_dataptr();
     data_pkt=packetbuf_dataptr();
     if (pkt->type ==ALIVE_REQUEST){
-        printf("RUNICAST ALIVE_REQUEST message received from %d.%d \n",from->u8[0], from->u8[1]);
+        //printf("RUNICAST ALIVE_REQUEST message received from %d.%d \n",from->u8[0], from->u8[1]);
         struct packet pkt_response;
         pkt_response.type=ALIVE_RESPONSE;
         pkt_response.rank=rank;
@@ -91,18 +91,18 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
     else if(data_pkt->type == SENSOR_DATA){
         //packetbuf_copyfrom(&pkt, sizeof(struct data_packet));
         //runicast_send(&runicastConnection, &parentAddr,MAX_TRANSMISSION_PACKET);
-        printf("Received Sensor Data from nodeID %d with rank %d\n",data_pkt->nodeSrc,data_pkt->nodeRank);
-        printf("Data received : temperature=%d and other data= %d\n",data_pkt->dataTemp,data_pkt->dataOther);
+        //printf("Received Sensor Data from nodeID %d with rank %d\n",data_pkt->nodeSrc,data_pkt->nodeRank);
+        //printf("Data received : temperature=%d and other data= %d\n",data_pkt->dataTemp,data_pkt->dataOther);
         printf("DATA,%d,%d,%d\n",data_pkt->nodeSrc,data_pkt->dataTemp,data_pkt->dataOther); //IMPORTANT
     }
 }
 
 static void runicastSender(struct runicast_conn *c, const linkaddr_t *to, uint8_t retransmissions){
-    printf("runicast message sent to %d.%d: retransmissions %d\n", to->u8[0], to->u8[1], retransmissions);
+    //printf("runicast message sent to %d.%d: retransmissions %d\n", to->u8[0], to->u8[1], retransmissions);
 }
 
 static void runicastTimeOut(struct runicast_conn *c, const linkaddr_t *to, uint8_t retransmissions){
-    printf("runicast message sent to %d.%d: timeout %d\n", to->u8[0], to->u8[1], retransmissions);
+    //printf("runicast message sent to %d.%d: timeout %d\n", to->u8[0], to->u8[1], retransmissions);
 }
 static const struct runicast_callbacks runicastCallback = {runicastReceiver, runicastSender,runicastTimeOut};
 
@@ -122,20 +122,22 @@ PROCESS_THREAD(runicastProcess, ev, data){
 /*-------------------------------Serial Thread Definition --------------------------------------------*/
 PROCESS_THREAD(serialProcess, ev, data)
 {
+    static struct etimer et;
     PROCESS_BEGIN();
 
     while(1) {
-
-        PROCESS_YIELD();
+        printf("serialThread\n");
+        
+        
 
         if(ev == serial_line_event_message) {
-            char* str = (char *) data;
-            printf("SOMTH received drom SRIAL\n");
-            printf("GATEWAY RECEIVED DATA mode: %s\n",str);
+           printf("received line: %s\n", (char *)data);
              
 
           //  }
         }
+        PROCESS_YIELD();
+        
     }
 
     PROCESS_END();
