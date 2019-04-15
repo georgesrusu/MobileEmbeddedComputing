@@ -26,7 +26,7 @@ struct data_packet{
 };
 
 enum dataSendingModes{
-    DATA_PERIODICALLY,
-    DATA_ON_CHANGE,
+    DATA_ON_CHANGE, //0
+    DATA_PERIODICALLY, //1
 };
 #endif

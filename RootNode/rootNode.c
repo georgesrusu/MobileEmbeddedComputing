@@ -10,6 +10,7 @@
 #include "random.h"
 #include <stdio.h>
 #include "../Common/messageTypes.h"
+#include "dev/serial-line.h"
 
 
 #define MAX_TRANSMISSION_PACKET 4
@@ -21,7 +22,8 @@ static int mode=DATA_PERIODICALLY; //default sending mode
 /*-------------------------------Processes Definition -------------------------------------*/
 PROCESS(broadcastProcess, "Broadcast communications");
 PROCESS(runicastProcess, "Runicast communications");
-AUTOSTART_PROCESSES(&broadcastProcess,&runicastProcess);
+PROCESS(serialProcess, "Serial communications with the gateway");
+AUTOSTART_PROCESSES(&broadcastProcess,&runicastProcess,&serialProcess);
 /*-------------------------------BroadCast Thread Definition --------------------------------------------*/
 
 static void broadcastReceive(struct broadcast_conn *c, const linkaddr_t *from){
@@ -108,12 +110,32 @@ PROCESS_THREAD(runicastProcess, ev, data){
     PROCESS_EXITHANDLER(runicast_close(&runicastConnection);)
     PROCESS_BEGIN();
 
-    // We need to open the connection to be able to process received runicast packets
     runicast_open(&runicastConnection, 146, &runicastCallback);
 
     while(1) {
-        // The root doesn't need to send any runicast packets periodically
         PROCESS_YIELD();
+    }
+
+    PROCESS_END();
+}
+
+/*-------------------------------Serial Thread Definition --------------------------------------------*/
+PROCESS_THREAD(serialProcess, ev, data)
+{
+    PROCESS_BEGIN();
+
+    while(1) {
+
+        PROCESS_YIELD();
+
+        if(ev == serial_line_event_message) {
+            char* str = (char *) data;
+            printf("SOMTH received drom SRIAL\n");
+            printf("GATEWAY RECEIVED DATA mode: %s\n",str);
+             
+
+          //  }
+        }
     }
 
     PROCESS_END();
