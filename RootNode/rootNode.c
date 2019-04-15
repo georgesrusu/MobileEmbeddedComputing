@@ -90,7 +90,8 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
         //packetbuf_copyfrom(&pkt, sizeof(struct data_packet));
         //runicast_send(&runicastConnection, &parentAddr,MAX_TRANSMISSION_PACKET);
         printf("Received Sensor Data from nodeID %d with rank %d\n",data_pkt->nodeSrc,data_pkt->nodeRank);
-        printf("DATA received : temperature=%d and other data= %d\n",data_pkt->dataTemp,data_pkt->dataOther);
+        printf("Data received : temperature=%d and other data= %d\n",data_pkt->dataTemp,data_pkt->dataOther);
+        printf("DATA,%d,%d,%d\n",data_pkt->nodeSrc,data_pkt->dataTemp,data_pkt->dataOther); //IMPORTANT
     }
 }
 
