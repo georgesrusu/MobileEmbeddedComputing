@@ -7,6 +7,7 @@ enum messageTypes{
     ALIVE_REQUEST,
     ALIVE_RESPONSE,
     SENSOR_DATA,
+    SENSOR_DATA_AGGREGATE,
 
 };
 
@@ -24,6 +25,13 @@ struct data_packet{
     uint16_t nodeRank;
     int8_t dataTemp; //allo from -128° to 128°
     int16_t dataOther; //to be changed
+};
+
+struct data_packet_aggregate{
+    uint8_t type;
+    uint8_t numberPacket;
+    struct data_packet packet1;
+    struct data_packet packet2;
 };
 
 enum dataSendingModes{

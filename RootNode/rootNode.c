@@ -19,7 +19,7 @@ static struct broadcast_conn broadcastConnection;
 static struct runicast_conn runicastConnection;
 static uint16_t rank=1; //root has rank 1 always, to create the tree
 static uint8_t mode=DATA_PERIODICALLY; //default sending mode
-static uint8_t haveSubscriber=0; //default no subscribers until the gateway is connected
+static uint8_t haveSubscriber=1; //default no subscribers until the gateway is connected
 /*-------------------------------Processes Definition -------------------------------------*/
 PROCESS(broadcastProcess, "Broadcast communications");
 PROCESS(runicastProcess, "Runicast communications");
@@ -62,7 +62,6 @@ PROCESS_THREAD(broadcastProcess, ev, data){
 
     /* Delay 2-4 seconds */
     etimer_set(&et, CLOCK_SECOND * 4 + random_rand() % (CLOCK_SECOND * 4));
-
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
     //packetbuf_copyfrom("Hello", 6);
@@ -77,10 +76,12 @@ PROCESS_THREAD(broadcastProcess, ev, data){
 static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, uint8_t seqno){
     struct packet *pkt;
     struct data_packet *data_pkt;
+    struct data_packet_aggregate *data_pkt_agg;
     pkt=packetbuf_dataptr();
     data_pkt=packetbuf_dataptr();
+    data_pkt_agg=packetbuf_dataptr();
     if (pkt->type ==ALIVE_REQUEST){
-        //printf("RUNICAST ALIVE_REQUEST message received from %d.%d \n",from->u8[0], from->u8[1]);
+        printf("RUNICAST ALIVE_REQUEST message received from %d.%d \n",from->u8[0], from->u8[1]);
         struct packet pkt_response;
         pkt_response.type=ALIVE_RESPONSE;
         pkt_response.rank=rank;
@@ -97,6 +98,16 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
         //printf("Received Sensor Data from nodeID %d with rank %d\n",data_pkt->nodeSrc,data_pkt->nodeRank);
         //printf("Data received : temperature=%d and other data= %d\n",data_pkt->dataTemp,data_pkt->dataOther);
         printf("DATA,%d,%d,%d\n",data_pkt->nodeSrc,data_pkt->dataTemp,data_pkt->dataOther); //IMPORTANT
+    }
+    else if (data_pkt_agg->type == SENSOR_DATA_AGGREGATE){
+        printf("receivede AGGREGATE PACKET\n");
+        printf("received size %d\n",data_pkt_agg->numberPacket);
+        if (data_pkt_agg->numberPacket >0){
+            printf("DATA,%d,%d,%d\n",data_pkt_agg->packet1.nodeSrc,data_pkt_agg->packet1.dataTemp,data_pkt_agg->packet1.dataOther); //IMPORTANT
+        }
+        if (data_pkt_agg->numberPacket >1){
+            printf("DATA,%d,%d,%d\n",data_pkt_agg->packet2.nodeSrc,data_pkt_agg->packet2.dataTemp,data_pkt_agg->packet2.dataOther); //IMPORTANT
+        }
     }
 }
 
@@ -133,25 +144,25 @@ PROCESS_THREAD(serialProcess, ev, data)
 	        char* receivedData = (char *) data;
             printf("received line %s\n",(char *)data);
 	        if(!strncmp(receivedData,"mode",4)){
-                printf("mode\n");
+                //printf("mode\n");
                 if(receivedData[5]=='0'){ // format is mode:0 or mode:1
-                    printf("recu mode 0\n");
+                    //printf("recu mode 0\n");
                     mode = DATA_ON_CHANGE;
-                    printf("mode is DATA on CHANGE\n");
+                    //printf("mode is DATA on CHANGE\n");
                 } else if(receivedData[5]=='1'){
                     mode=DATA_PERIODICALLY;
-                    printf("mode is DATA PERIODICALLY\n");
+                    //printf("mode is DATA PERIODICALLY\n");
                 }
 
             } else {
                 int connectedSubscribers = receivedData[0]-'0';
-                printf("subscribers are %d\n",connectedSubscribers);
+                //printf("subscribers are %d\n",connectedSubscribers);
                 if(connectedSubscribers > 1){
-                    printf("on peut envoyer,plus de 1 subscriber\n");
+                    //printf("on peut envoyer,plus de 1 subscriber\n");
                     haveSubscriber=1;
                 } else {
                     haveSubscriber=0;
-                    printf("STOP envoie\n");
+                    //printf("STOP envoie\n");
                 }
 
             }
