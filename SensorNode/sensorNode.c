@@ -25,7 +25,8 @@ static uint16_t parentRank;
 static linkaddr_t parentAddr;
 static int ParentAliveCounter=0;
 static int randomSensorData=1;
-static int mode;
+static uint8_t mode;
+static uint8_t haveSubscriber=0;
 static int8_t oldDataTemp=0;
 static int16_t oldDataOther=0; 
 /*-------------------------------Processes Definition -------------------------------------*/
@@ -46,6 +47,7 @@ static void broadcastReceiver(struct broadcast_conn *c, const linkaddr_t *from){
         pkt_response.type=DISCOVERY_RESPONSE;
         pkt_response.rank=rank;
         pkt_response.mode=mode;
+        pkt_response.haveSubscriber=haveSubscriber;
         int countTransmission=0;
         while (runicast_is_transmitting(&runicastConnection) && ++countTransmission<MAX_TRANSMISSION_PACKET){}
         packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
@@ -107,6 +109,7 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
         pkt_response.type=ALIVE_RESPONSE;
         pkt_response.rank=rank;
         pkt_response.mode=mode;
+        pkt_response.haveSubscriber=haveSubscriber;
         int countTransmission=0;
         while (runicast_is_transmitting(&runicastConnection) && ++countTransmission<MAX_TRANSMISSION_PACKET){}
         packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
@@ -115,6 +118,7 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
     else if (pkt->type == ALIVE_RESPONSE){
         printf("RUNICAST ALIVE_RESPONSE message received from %d.%d \n",from->u8[0], from->u8[1]);
         mode=pkt->mode;
+        haveSubscriber=pkt->haveSubscriber;
         if (pkt->rank == 0 || pkt->rank > rank){
             printf("RESETPARENTFROM ALIVE pACKET\n");
             rank=0;
@@ -185,7 +189,7 @@ PROCESS_THREAD(getDataProcess, ev, data){
     while(1) {
         etimer_set(&et, CLOCK_SECOND * 4 + random_rand() % (CLOCK_SECOND * 4));
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-        if (rank>1){
+        if (rank>1 && haveSubscriber){
             struct data_packet data_pkt;
             data_pkt.type=SENSOR_DATA;
             data_pkt.nodeSrc=node_id;
@@ -212,9 +216,9 @@ PROCESS_THREAD(getDataProcess, ev, data){
                 runicast_send(&runicastConnection, &parentAddr,MAX_TRANSMISSION_PACKET);
             }
             else if (mode == DATA_ON_CHANGE){
-                printf("MODE DIFFERENTIAL ACTIVATED\n");
+                printf("MODE DATA ON CHANGE ACTIVATED\n");
                 if (oldDataTemp != data_pkt.dataTemp || oldDataOther != data_pkt.dataOther){
-                    printf("DATA DIFFERENTIAL\n");
+                    printf("DATA ON CHANGE\n");
                     oldDataTemp=data_pkt.dataTemp;
                     oldDataOther=data_pkt.dataOther;
                     int countTransmission=0;

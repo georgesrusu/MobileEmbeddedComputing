@@ -18,7 +18,8 @@
 static struct broadcast_conn broadcastConnection;
 static struct runicast_conn runicastConnection;
 static uint16_t rank=1; //root has rank 1 always, to create the tree
-static int mode=DATA_PERIODICALLY; //default sending mode
+static uint8_t mode=DATA_PERIODICALLY; //default sending mode
+static uint8_t haveSubscriber=0; //default no subscribers until the gateway is connected
 /*-------------------------------Processes Definition -------------------------------------*/
 PROCESS(broadcastProcess, "Broadcast communications");
 PROCESS(runicastProcess, "Runicast communications");
@@ -37,6 +38,7 @@ static void broadcastReceive(struct broadcast_conn *c, const linkaddr_t *from){
         pkt_response.type=DISCOVERY_RESPONSE;
         pkt_response.rank=rank;
         pkt_response.mode=mode;
+        pkt_response.haveSubscriber=haveSubscriber;
         int countTransmission=0;
         while (runicast_is_transmitting(&runicastConnection) && ++countTransmission<MAX_TRANSMISSION_PACKET){}
         packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
@@ -83,6 +85,7 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
         pkt_response.type=ALIVE_RESPONSE;
         pkt_response.rank=rank;
         pkt_response.mode=mode;
+        pkt_response.haveSubscriber=haveSubscriber;
         int countTransmission=0;
         while (runicast_is_transmitting(&runicastConnection) && ++countTransmission<MAX_TRANSMISSION_PACKET){}
         packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
@@ -125,35 +128,29 @@ PROCESS_THREAD(serialProcess, ev, data)
     PROCESS_BEGIN();
 
     while(1) {
-
-            PROCESS_YIELD();
-
-        // When the root receives a message from the gateway, it should update the configurations
+        PROCESS_YIELD();
         if(ev == serial_line_event_message) {
-	        char* str = (char *) data;
+	        char* receivedData = (char *) data;
             printf("received line %s\n",(char *)data);
-	        if(strstr(str, "mode") != NULL){
-                // If the received string starts with "mode", the it contains informations about the use of either PERIODIC_MODE or DIFFERENTIAL_MODE
-
-                if(str[4]=='0'){
+	        if(!strncmp(receivedData,"mode",4)){
+                printf("mode\n");
+                if(receivedData[5]=='0'){ // format is mode:0 or mode:1
                     printf("recu mode 0\n");
-                    //mode = PERIODIC_MODE;
-                } else if(str[4]=='1'){
-                    //mode = DIFFERENTIAL_MODE;
-                    printf("recu mode 1\n");
-                }
-                else{
-                    printf("recu 9");
+                    mode = DATA_ON_CHANGE;
+                    printf("mode is DATA on CHANGE\n");
+                } else if(receivedData[5]=='1'){
+                    mode=DATA_PERIODICALLY;
+                    printf("mode is DATA PERIODICALLY\n");
                 }
 
             } else {
-                // The message from the gateway then contains the number of subscribers
-                int received_number = str[0] - '0'; // Transform the char to an integer
-
-                // The count of subscribers should be greater than 1 because this number is retrieved using a subscriber itself
-                if(received_number > 1){
+                int connectedSubscribers = receivedData[0]-'0';
+                printf("subscribers are %d\n",connectedSubscribers);
+                if(connectedSubscribers > 1){
                     printf("on peut envoyer,plus de 1 subscriber\n");
+                    haveSubscriber=1;
                 } else {
+                    haveSubscriber=0;
                     printf("STOP envoie\n");
                 }
 

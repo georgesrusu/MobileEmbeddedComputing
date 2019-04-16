@@ -14,6 +14,7 @@ struct packet{
     uint8_t type;
     uint16_t rank;
     uint8_t mode;
+    uint8_t haveSubscriber;
 
 };
 

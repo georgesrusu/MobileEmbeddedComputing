@@ -7,7 +7,7 @@ from time import sleep
 import argparse
 
 
-mode="-1"
+mode="1"
 all_modes=["0","1"]
 def console(threadName,p):
     global mode
@@ -22,7 +22,7 @@ def console(threadName,p):
 def readFromRoot(serial):
     p = Popen(["make","login","TARGET=z1","MOTES="+serial], stdout = PIPE, stdin = PIPE)
     p1 = Popen(["mosquitto_sub","-t","$SYS/broker/clients/active"], stdout = p.stdin, stdin = PIPE)
-    print("To change mode just type 0 for DATA_ON_CHANGE and 1 DATA_PERIODICALLY \n")
+    print("DEFAULT MODE is DATA_PERIODICALLY.\nTo change mode just type 0 for DATA_ON_CHANGE and 1 DATA_PERIODICALLY \n")
     threading1 = threading.Thread(target=console,args=("console",p))
     threading1.daemon = True
     threading1.start()
