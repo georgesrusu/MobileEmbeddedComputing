@@ -6,7 +6,9 @@
 ! SensorNode/Makefile
 ! SensorNode/sensorNode.c
 ! Utils-code/*
-! Common/*
+! Common/messageTypes.h
 
 !project.pdf
 !README.md
+! GatewayRoot/gatewayRoot.py
+! MQTT-subscriber/subscriber.py
