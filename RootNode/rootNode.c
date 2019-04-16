@@ -6,7 +6,7 @@
 
 #include "contiki-conf.h"
 #include "contiki.h"
-#include "net/rime.h"
+#include "net/rime/rime.h"
 #include "random.h"
 #include <stdio.h>
 #include "../Common/messageTypes.h"
@@ -122,22 +122,43 @@ PROCESS_THREAD(runicastProcess, ev, data){
 /*-------------------------------Serial Thread Definition --------------------------------------------*/
 PROCESS_THREAD(serialProcess, ev, data)
 {
-    static struct etimer et;
     PROCESS_BEGIN();
 
     while(1) {
-        printf("serialThread\n");
-        
-        
 
+            PROCESS_YIELD();
+
+        // When the root receives a message from the gateway, it should update the configurations
         if(ev == serial_line_event_message) {
-           printf("received line: %s\n", (char *)data);
-             
+	        char* str = (char *) data;
+            printf("received line %s\n",(char *)data);
+	        if(strstr(str, "mode") != NULL){
+                // If the received string starts with "mode", the it contains informations about the use of either PERIODIC_MODE or DIFFERENTIAL_MODE
 
-          //  }
+                if(str[4]=='0'){
+                    printf("recu mode 0\n");
+                    //mode = PERIODIC_MODE;
+                } else if(str[4]=='1'){
+                    //mode = DIFFERENTIAL_MODE;
+                    printf("recu mode 1\n");
+                }
+                else{
+                    printf("recu 9");
+                }
+
+            } else {
+                // The message from the gateway then contains the number of subscribers
+                int received_number = str[0] - '0'; // Transform the char to an integer
+
+                // The count of subscribers should be greater than 1 because this number is retrieved using a subscriber itself
+                if(received_number > 1){
+                    printf("on peut envoyer,plus de 1 subscriber\n");
+                } else {
+                    printf("STOP envoie\n");
+                }
+
+            }
         }
-        PROCESS_YIELD();
-        
     }
 
     PROCESS_END();
