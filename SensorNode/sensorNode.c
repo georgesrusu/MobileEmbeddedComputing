@@ -12,7 +12,7 @@
 #include "../Common/messageTypes.h"
 #include "node-id.h"
 #include "dev/tmp102.h"
-#include "dev/battery-sensor.h"
+#include "dev/z1-phidgets.h"
 
 #define MAX_TRANSMISSION_PACKET 4
 #define MAX_PACKET_PARENT_ALIVE 4
@@ -27,7 +27,7 @@ static uint16_t rank=0; //when rank is 0, means that it's a sensor and need for 
 static uint16_t parentRank;
 static linkaddr_t parentAddr;
 static int ParentAliveCounter=0;
-static int randomSensorData=1;
+static int randomSensorData=0; //0 if real hardware, 1 if random
 static uint8_t mode;
 static uint8_t haveSubscriber=0;
 static int8_t oldDataTemp=0;
@@ -262,10 +262,9 @@ PROCESS_THREAD(getDataProcess, ev, data){
             }else{
                 printf("real hardware used\n");
                 tmp102_init();
-                SENSORS_ACTIVATE(battery_sensor);
-                data_pkt.dataTemp= tmp102_read_temp_raw(); //datatemp on 8 bit
-                //data_pkt.dataOther=tmp102_read_temp_raw(); //data on 16 bit
-                data_pkt.dataOther=battery_sensor.value(0);//data on 16 bit
+                SENSORS_ACTIVATE(phidgets);
+                data_pkt.dataTemp= tmp102_read_temp_raw(); //datatemp on 8 bit -> Z1 only for Z1
+                data_pkt.dataOther= phidgets.value(PHIDGET5V_1);//data on 16 bit -> Z1 only for Z1
                 //TODO complete for real hardware
             }
             //changing modes

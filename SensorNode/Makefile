@@ -1,4 +1,4 @@
-CONTIKI_PROJECT = SensorNode
+CONTIKI_PROJECT = sensorNode
 all: $(CONTIKI_PROJECT)
 CONTIKI_WITH_RIME = 1
 CONTIKI = /home/user/contiki
