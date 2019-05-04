@@ -27,7 +27,7 @@ static uint16_t rank=0; //when rank is 0, means that it's a sensor and need for 
 static uint16_t parentRank;
 static linkaddr_t parentAddr;
 static int ParentAliveCounter=0;
-static int randomSensorData=0; //0 if real hardware, 1 if random
+static int randomSensorData=1; //0 if real hardware, 1 if random
 static uint8_t mode;
 static uint8_t haveSubscriber=0;
 static int8_t oldDataTemp=0;
