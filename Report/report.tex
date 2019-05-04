@@ -1,6 +1,6 @@
 \documentclass[a4paper,10pt]{article}
 \usepackage[utf8]{inputenc}
-\usepackage[francais]{babel}
+\usepackage[english]{babel}
 \usepackage{indentfirst}
 \usepackage{listings}
 \usepackage{graphicx}
@@ -9,7 +9,7 @@
 \usepackage{hyperref}
 \usepackage[top=2.5cm,bottom=2.5cm,left=2.5cm,right=2.5cm]{geometry}
 \pagestyle{headings}
-\title{Group project}
+\title{Mobile Embedded Group Project}
 \author{Ilias Boulif, Jérémy Bricq, George Rusu}
 \date{\today}
 \begin{document}
@@ -20,9 +20,9 @@
 
 The aim of this project is to propose an implementation of an IoT network using \textit{Rime} where the sensor data is published through an MQTT-Rime gateway to normal MQTT subscribers. To achieve that we have implemented as requested by the project's statement, a tree-based routing protocol using Rime and an MQTT-Rime gateway.
 
-Firstly we are going to explain the general structure of our system. Then we are going to present the network organization and routing of our network. And finally we are going to discuss about the optimizations that we have implemented.
+Firstly, we are going to explain the general structure of our system. Secondly, we are going to present and explain the different messages exchanged in a normal run. Then, we will explain the organization and the rounting in our environement. And finaly, we will discuss about the optimizations we manage to implement.
 
-The source code of this project implemenation is available at \cite{github}.
+The implementation source code of this project is available at \cite{github}.
 
 
 \section{General structure of our system}
@@ -33,12 +33,14 @@ The source code of this project implemenation is available at \cite{github}.
 %-le réseau est pensé pour pouvoir envoyé des info au root meme si il y a des sensors qui sont déplacé ou suprimé
 %- le root est connecté au gatesay qui permet d'envoyer vers subscriber
 %- le root recoit mode depuis le gateway , il est envoyé dans les alives responses packet jusqu'en bas
+Our infrastructure is divised in 2 sides: over air side which cover the motes (root and sensor) and a wired network which covers the root, the gateway the broket and the subscribers. 
+
 
 Our system is a network composed of one root node and a number of sensor nodes. The network depends on the root which is the node responsible for transmitting the information to the subscribers. The sensor nodes for their part, collect the information for the root and forward them to him.  using rime ! The nodes communicate by sending different kind of messages (see Section \ref{msgFormat}. Some of these messages are used to ensure a good working of the system. The network is built to keep sending information to the root even if there is a node is moved or deleted.  The root is connected to the gateway in order to send the information to the subscribers. Some modes are built in the system. These modes describe the system's behaviour. The root receives the mode through the gateway, and forward it the nodes by the mean of the alive response packets. 
 
 
 
-\subsection{Message format}
+\section{Message format}
 \label{msgFormat}
 In our implementation we have 3 packets structures. The node interprets the packet according to his type. We will explain each kind of packets and discuss the different types used by nodes to communicate between them.
 
@@ -85,6 +87,8 @@ In our implementation we have 3 packets structures. The node interprets the pack
 
 \section{Network organization and routing}
 
+\section{Gateway}
+\section{MQTT-Subscriber}
 \section{Optimizations}
 \label{opti}
 

@@ -1,6 +1,8 @@
 \BOOKMARK [1][-]{section.1}{Introduction}{}% 1
 \BOOKMARK [1][-]{section.2}{General structure of our system}{}% 2
-\BOOKMARK [2][-]{subsection.2.1}{Message format}{section.2}% 3
-\BOOKMARK [1][-]{section.3}{Network organization and routing}{}% 4
-\BOOKMARK [1][-]{section.4}{Optimizations}{}% 5
-\BOOKMARK [1][-]{section.5}{Conclusion}{}% 6
+\BOOKMARK [1][-]{section.3}{Message format}{}% 3
+\BOOKMARK [1][-]{section.4}{Network organization and routing}{}% 4
+\BOOKMARK [1][-]{section.5}{Gateway}{}% 5
+\BOOKMARK [1][-]{section.6}{MQTT-Subscriber}{}% 6
+\BOOKMARK [1][-]{section.7}{Optimizations}{}% 7
+\BOOKMARK [1][-]{section.8}{Conclusion}{}% 8
