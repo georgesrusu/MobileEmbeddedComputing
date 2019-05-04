@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.12.12)  4 MAY 2019 17:24
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2018.3.27)  4 MAY 2019 19:12
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -693,45 +693,62 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 
  [1
 
-{/usr/local/texlive/2017basic/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (25.54567pt too wide) in paragraph at lines 49--50
+{/usr/local/texlive/2017basic/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] <.
+/img/structure.png, id=57, 419.5675pt x 427.5975pt>
+File: ./img/structure.png Graphic file (type png)
+
+<use ./img/structure.png>
+Package pdftex.def Info: ./img/structure.png used on input line 33.
+(pdftex.def)             Requested size: 209.78323pt x 213.79822pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 39--40
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 41--42
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 43--44
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 46--47
+
+ []
+
+[2 <./img/structure.png>]
+Overfull \hbox (25.54567pt too wide) in paragraph at lines 58--59
 []\OT1/cmr/m/n/10 Type : [DIS-COV-ERY[]REQUEST, DIS-COV-ERY[]RESPONSE, ALIVE[]R
 EQUEST, ALIVE[]RESPONSE] 
  []
 
-[2]
+[3]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 102.
+(Font)              <7> on input line 114.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 102.
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 106.
- [3]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 106.
+(Font)              <5> on input line 114.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 118.
+ [4]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 118.
  (./report.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 106.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 106.
-
-
-Package rerunfilecheck Warning: File `report.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `report.out':
-(rerunfilecheck)             Before: EFA67187A7E45120DA71800ADC9187C1;322
-(rerunfilecheck)             After:  2D768B9701A6CAC61856B05EA11AEF21;414.
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 106.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 118.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 118.
+Package rerunfilecheck Info: File `report.out' has not changed.
+(rerunfilecheck)             Checksum: 2D768B9701A6CAC61856B05EA11AEF21;414.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 118.
  ) 
 Here is how much of TeX's memory you used:
- 8074 strings out of 494437
- 117767 string characters out of 6166644
- 227678 words of memory out of 5000000
- 11302 multiletter control sequences out of 15000+600000
+ 8090 strings out of 494437
+ 117972 string characters out of 6166645
+ 228854 words of memory out of 5000000
+ 11313 multiletter control sequences out of 15000+600000
  8814 words of font info for 31 fonts, out of 8000000 for 9000
  319 hyphenation exceptions out of 8191
- 28i,7n,32p,891b,335s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 28i,7n,32p,633b,336s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2017basic/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx1
 0.pfb></usr/local/texlive/2017basic/texmf-dist/fonts/type1/public/amsfonts/cm/c
 mbx12.pfb></usr/local/texlive/2017basic/texmf-dist/fonts/type1/public/amsfonts/
@@ -742,10 +759,10 @@ ic/amsfonts/cm/cmr17.pfb></usr/local/texlive/2017basic/texmf-dist/fonts/type1/p
 ublic/amsfonts/cm/cmsl10.pfb></usr/local/texlive/2017basic/texmf-dist/fonts/typ
 e1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2017basic/texmf-dist/fonts
 /type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on report.pdf (3 pages, 128202 bytes).
+Output written on report.pdf (4 pages, 151036 bytes).
 PDF statistics:
- 130 PDF objects out of 1000 (max. 8388607)
- 114 compressed objects within 2 object streams
- 37 named destinations out of 1000 (max. 500000)
- 49 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 150 PDF objects out of 1000 (max. 8388607)
+ 131 compressed objects within 2 object streams
+ 39 named destinations out of 1000 (max. 500000)
+ 70 words of extra memory for PDF output out of 10000 (max. 10000000)
 
