@@ -18,25 +18,23 @@
 \newpage
 \section{Introduction}
 
-In the course of Mobile and Embedded Computing we have seen two ways to send sensor data from IoT devices to MQTT subscribers. The first way is with MQTT on TCP and the last way is with MQTT-SN on UDP. However we have seen during the exercises sessions that with an IP network based on 6LoWPAN and RPL it is difficult to obtain good network performance.
-
 The aim of this project is to propose an implementation of an IoT network using \textit{Rime} where the sensor data is published through an MQTT-Rime gateway to normal MQTT subscribers. To achieve that we have implemented as requested by the project's statement, a tree-based routing protocol using Rime and an MQTT-Rime gateway.
 
--expliqué stucture
+Firstly we are going to explain the general structure of our system. Then we are going to present the network organization and routing of our network. And finally we are going to discuss about the optimizations that we have implemented.
 
 The source code of this project implemenation is available at \cite{github}.
 
 
 \section{General structure of our system}
--le réseau basé sur un root , transmet les info au subsc
--des sensors node qui recup les info et les envoi au root
--les sensors se connecte entre par un réseau sans fil (rime)
-il comminuque entre en s'envoyant diff msg pour s'assurer du bon fct du reseau
--le réseau est pensé pour pouvoir envoyé des info au root meme si il y a des sensors qui sont déplacé ou suprimé
-- le root est connecté au gatesay qui permet d'envoyer vers subscriber
-- le root recoit mode depuis le gateway , il est envoyé dans les alives responses packet jusqu'en bas
+%-le réseau basé sur un root , transmet les info au subsc
+%-des sensors node qui recup les info et les envoi au root
+%-les sensors se connecte entre par un réseau sans fil (rime)
+%il comminuque entre en s'envoyant diff msg pour s'assurer du bon fct du reseau
+%-le réseau est pensé pour pouvoir envoyé des info au root meme si il y a des sensors qui sont déplacé ou suprimé
+%- le root est connecté au gatesay qui permet d'envoyer vers subscriber
+%- le root recoit mode depuis le gateway , il est envoyé dans les alives responses packet jusqu'en bas
 
-Our system is a network composed of one root node and a number of sensor nodes. The network depends on the root which is the node responsible for transmitting the information to the subscribers. The sensor nodes for their part, collect the information for the root and forward them to him.  use rime ! The nodes communicate by sending different kind of messages (see Section \ref{msgFormat}.
+Our system is a network composed of one root node and a number of sensor nodes. The network depends on the root which is the node responsible for transmitting the information to the subscribers. The sensor nodes for their part, collect the information for the root and forward them to him.  using rime ! The nodes communicate by sending different kind of messages (see Section \ref{msgFormat}. Some of these messages are used to ensure a good working of the system. The network is built to keep sending information to the root even if there is a node is moved or deleted.  The root is connected to the gateway in order to send the information to the subscribers. Some modes are built in the system. These modes describe the system's behaviour. The root receives the mode through the gateway, and forward it the nodes by the mean of the alive response packets. 
 
 
 
