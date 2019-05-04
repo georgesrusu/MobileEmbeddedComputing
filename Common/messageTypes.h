@@ -1,6 +1,7 @@
 #ifndef messageTypes_h
 #define messageTypes_h
 
+//types of packets
 enum messageTypes{
     DISCOVERY_REQUEST,
     DISCOVERY_RESPONSE,
@@ -10,7 +11,7 @@ enum messageTypes{
     SENSOR_DATA_AGGREGATE,
 
 };
-
+//general struct of packet for keep Alive, routing
 struct packet{
     uint8_t type;
     uint16_t rank;
@@ -18,15 +19,16 @@ struct packet{
     uint8_t haveSubscriber;
 
 };
-
+//general struct of data packets
 struct data_packet{
     uint8_t type;
     uint16_t nodeSrc;
     uint16_t nodeRank;
-    int8_t dataTemp; //allo from -128° to 128°
-    int16_t dataOther; //to be changed
+    int8_t dataTemp; //allow from -128° to 128°
+    int16_t dataOther;
 };
 
+//general struct for data aggregation optimization
 struct data_packet_aggregate{
     uint8_t type;
     uint8_t numberPacket;
@@ -34,6 +36,7 @@ struct data_packet_aggregate{
     struct data_packet packet2;
 };
 
+//different sending modes
 enum dataSendingModes{
     DATA_ON_CHANGE, //0
     DATA_PERIODICALLY, //1

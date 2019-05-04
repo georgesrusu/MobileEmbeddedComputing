@@ -31,14 +31,14 @@ static void broadcastReceive(struct broadcast_conn *c, const linkaddr_t *from){
     struct packet *pkt;
     pkt=packetbuf_dataptr();
 
-    if (pkt->type == DISCOVERY_REQUEST){
+    if (pkt->type == DISCOVERY_REQUEST){ //receiving discovery request
         //printf("broadcast DISCOVERY_REQUEST message received from %d.%d\n",from->u8[0], from->u8[1]);
         //DISCOVERY RESPONSE en UNICAST
         struct packet pkt_response;
         pkt_response.type=DISCOVERY_RESPONSE;
         pkt_response.rank=rank;
         pkt_response.mode=mode;
-        pkt_response.haveSubscriber=haveSubscriber;
+        pkt_response.haveSubscriber=haveSubscriber; //send if there are subscriber
         int countTransmission=0;
         while (runicast_is_transmitting(&runicastConnection) && ++countTransmission<MAX_TRANSMISSION_PACKET){}
         packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
@@ -64,9 +64,6 @@ PROCESS_THREAD(broadcastProcess, ev, data){
     etimer_set(&et, CLOCK_SECOND * 4 + random_rand() % (CLOCK_SECOND * 4));
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
 
-    //packetbuf_copyfrom("Hello", 6);
-    //broadcast_send(&broadcastConnection);
-    //printf("broadcast message sent\n");
   }
 
   PROCESS_END();
@@ -80,7 +77,7 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
     pkt=packetbuf_dataptr();
     data_pkt=packetbuf_dataptr();
     data_pkt_agg=packetbuf_dataptr();
-    if (pkt->type ==ALIVE_REQUEST){
+    if (pkt->type ==ALIVE_REQUEST){ //receiving alive_request
         printf("RUNICAST ALIVE_REQUEST message received from %d.%d \n",from->u8[0], from->u8[1]);
         struct packet pkt_response;
         pkt_response.type=ALIVE_RESPONSE;
@@ -92,21 +89,17 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
         packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
         runicast_send(c, from,MAX_TRANSMISSION_PACKET);
     }
-    else if(data_pkt->type == SENSOR_DATA){
-        //packetbuf_copyfrom(&pkt, sizeof(struct data_packet));
-        //runicast_send(&runicastConnection, &parentAddr,MAX_TRANSMISSION_PACKET);
-        //printf("Received Sensor Data from nodeID %d with rank %d\n",data_pkt->nodeSrc,data_pkt->nodeRank);
-        //printf("Data received : temperature=%d and other data= %d\n",data_pkt->dataTemp,data_pkt->dataOther);
+    else if(data_pkt->type == SENSOR_DATA){ //receiving data and publish to Gateway
         printf("DATA,%d,%d,%d\n",data_pkt->nodeSrc,data_pkt->dataTemp,data_pkt->dataOther); //IMPORTANT
     }
-    else if (data_pkt_agg->type == SENSOR_DATA_AGGREGATE){
+    else if (data_pkt_agg->type == SENSOR_DATA_AGGREGATE){ //In case of receiving a data aggregate packet -> need to decompose the two packets
         printf("receivede AGGREGATE PACKET\n");
         printf("received size %d\n",data_pkt_agg->numberPacket);
         if (data_pkt_agg->numberPacket >0){
-            printf("DATA,%d,%d,%d\n",data_pkt_agg->packet1.nodeSrc,data_pkt_agg->packet1.dataTemp,data_pkt_agg->packet1.dataOther); //IMPORTANT
+            printf("DATA,%d,%d,%d\n",data_pkt_agg->packet1.nodeSrc,data_pkt_agg->packet1.dataTemp,data_pkt_agg->packet1.dataOther); //IMPORTANT for publishing
         }
         if (data_pkt_agg->numberPacket >1){
-            printf("DATA,%d,%d,%d\n",data_pkt_agg->packet2.nodeSrc,data_pkt_agg->packet2.dataTemp,data_pkt_agg->packet2.dataOther); //IMPORTANT
+            printf("DATA,%d,%d,%d\n",data_pkt_agg->packet2.nodeSrc,data_pkt_agg->packet2.dataTemp,data_pkt_agg->packet2.dataOther); //IMPORTANT for publishing
         }
     }
 }
@@ -144,9 +137,8 @@ PROCESS_THREAD(serialProcess, ev, data)
 	        char* receivedData = (char *) data;
             printf("received line %s\n",(char *)data);
 	        if(!strncmp(receivedData,"mode",4)){
-                //printf("mode\n");
+                //Mode receving from console
                 if(receivedData[5]=='0'){ // format is mode:0 or mode:1
-                    //printf("recu mode 0\n");
                     mode = DATA_ON_CHANGE;
                     //printf("mode is DATA on CHANGE\n");
                 } else if(receivedData[5]=='1'){
@@ -155,14 +147,15 @@ PROCESS_THREAD(serialProcess, ev, data)
                 }
 
             } else {
+                //receiving number of subscriber
                 int connectedSubscribers = receivedData[0]-'0';
                 //printf("subscribers are %d\n",connectedSubscribers);
-                if(connectedSubscribers > 1){
-                    //printf("on peut envoyer,plus de 1 subscriber\n");
+                if(connectedSubscribers > 1){  //more than 1 because console is counted as one
+                    //printf("MORE THAN 1 subscriber\n");
                     haveSubscriber=1;
                 } else {
                     haveSubscriber=0;
-                    //printf("STOP envoie\n");
+                    //printf("STOP 0 SUBSCRIBERn");
                 }
 
             }

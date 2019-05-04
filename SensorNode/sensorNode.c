@@ -12,6 +12,7 @@
 #include "../Common/messageTypes.h"
 #include "node-id.h"
 #include "dev/tmp102.h"
+#include "dev/battery-sensor.h"
 
 #define MAX_TRANSMISSION_PACKET 4
 #define MAX_PACKET_PARENT_ALIVE 4
@@ -44,8 +45,8 @@ AUTOSTART_PROCESSES(&broadcastProcess,&runicastProcess,&getDataProcess);
 static void broadcastReceiver(struct broadcast_conn *c, const linkaddr_t *from){
     struct packet *pkt;
     pkt=packetbuf_dataptr();
-
-    if (rank>0 && pkt->type == DISCOVERY_REQUEST){
+    
+    if (rank>0 && pkt->type == DISCOVERY_REQUEST){ //Discovery Request received from children
         //printf("broadcast DISCOVERY_REQUEST message received from %d.%d\n",from->u8[0], from->u8[1]);
         //DISCOVERY RESPONSE en UNICAST
         struct packet pkt_response;
@@ -92,9 +93,9 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
     data_pkt=packetbuf_dataptr();
     data_pkt_agg=packetbuf_dataptr();
     printf("RUNICAST IN MESSAGE\n");
-    if (pkt->type ==DISCOVERY_RESPONSE){
+    if (pkt->type ==DISCOVERY_RESPONSE){ //received Discoveru Response from potential future parent
         //printf("RUNICAST DISCOVERY_RESPONSE message received from %d.%d WITH RANK %d\n",from->u8[0], from->u8[1],(int)pkt->rank);
-        if (rank==0){
+        if (rank==0){ //if no parent , received is new parent
             printf("New Parent found with RANK %d, Parent is %d,%d\n",(int)pkt->rank,from->u8[0], from->u8[1]);
             rank=pkt->rank;
             parentAddr=*from;
@@ -102,7 +103,7 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
             mode=pkt->mode;
             rank++;
         }
-        else if ((pkt->rank)+1 < rank){
+        else if ((pkt->rank)+1 < rank){ //if we have a parent but the received is better than the one we have, change parent to new
             printf("Parent Changed found with RANK %d, Parent is %d,%d\n",(int)pkt->rank,from->u8[0], from->u8[1]);
             rank=pkt->rank;
             parentAddr=*from;
@@ -111,7 +112,7 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
             rank++;
         }
     }
-    else if (pkt->type ==ALIVE_REQUEST){
+    else if (pkt->type ==ALIVE_REQUEST){ //alive message for keeping the parenting relation
         printf("RUNICAST ALIVE_REQUEST message received from %d.%d \n",from->u8[0], from->u8[1]);
         struct packet pkt_response;
         pkt_response.type=ALIVE_RESPONSE;
@@ -123,17 +124,17 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
         packetbuf_copyfrom(&pkt_response, sizeof(struct packet));
         runicast_send(c, from,MAX_TRANSMISSION_PACKET);
     }
-    else if (pkt->type == ALIVE_RESPONSE){
+    else if (pkt->type == ALIVE_RESPONSE){ //alive response to the alive request message
         printf("RUNICAST ALIVE_RESPONSE message received from %d.%d \n",from->u8[0], from->u8[1]);
         mode=pkt->mode;
         haveSubscriber=pkt->haveSubscriber;
-        if (pkt->rank == 0 || pkt->rank > rank){
+        if (pkt->rank == 0 || pkt->rank > rank){ //reset parent chain, if the parent of our parent reset his rank (loose parent) we are also reseting
             printf("RESETPARENTFROM ALIVE pACKET\n");
             rank=0;
         }
         ParentAliveCounter=0;
     }
-    else if(data_pkt->type == SENSOR_DATA){
+    else if(data_pkt->type == SENSOR_DATA){ //sensor data message and we aggregate 2 into 1
         printf("received sensor data from %d\n",from->u8[0]);
         if (rank>1){
             printf("packet counter is %d\n",packetAggregateCounter);
@@ -152,18 +153,35 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
             }
         }
     }
-    else if (data_pkt_agg->type == SENSOR_DATA_AGGREGATE){
+    else if (data_pkt_agg->type == SENSOR_DATA_AGGREGATE){ //OPTIMIZATION: in case we receive an aggregate packet that is half empty we fill it with a data packet
         if (rank>1){
             int countTransmission=0;
             while (runicast_is_transmitting(&runicastConnection) && ++countTransmission<MAX_TRANSMISSION_PACKET){}
-            printf("Retransmission AGGEGATION\n");
-            packetbuf_copyfrom(data_pkt_agg, sizeof(struct data_packet_aggregate));
-            runicast_send(c, &parentAddr,MAX_TRANSMISSION_PACKET);
-            //packetAggregateCounter=0;
+            if (data_pkt_agg->numberPacket == MAX_PACKET_AGGREGATE){
+                printf("Retransmission AGGEGATION\n");
+                packetbuf_copyfrom(data_pkt_agg, sizeof(struct data_packet_aggregate));
+                runicast_send(c, &parentAddr,MAX_TRANSMISSION_PACKET);
+            }
+            else{
+                printf("AGGEGATION NON Remplie\n");
+                if (packetAggregateCounter==1){
+                    printf("remplir packet aggreagation\n");
+                    data_pkt_agg->numberPacket=MAX_PACKET_AGGREGATE;
+                    data_pkt_agg->packet2=dataPacketAggregate.packet1;
+                    packetAggregateCounter--;
+                    packetbuf_copyfrom(data_pkt_agg, sizeof(struct data_packet_aggregate));
+                    runicast_send(c, &parentAddr,MAX_TRANSMISSION_PACKET);
+                }
+                else{
+                    printf("Retransmission AGGEGATION NON rempli\n");
+                    packetbuf_copyfrom(data_pkt_agg, sizeof(struct data_packet_aggregate));
+                    runicast_send(c, &parentAddr,MAX_TRANSMISSION_PACKET);
+                }
+            }
 
         }
     }
-
+    //if packet aggregate is full or if after X packet the aggregate is not yet full, we send it half full
     countPacketRunicast++;
     if (countPacketRunicast > MAX_PACKET_RUNICAST_FOR_AGGREGATION || packetAggregateCounter==MAX_PACKET_AGGREGATE) {
         if (rank>1 && packetAggregateCounter>0){
@@ -197,7 +215,6 @@ PROCESS_THREAD(runicastProcess, ev, data){
     while(1) {
   
         if (rank>1){
-            //if (!runicast_is_transmitting(&runicastConnection)){
             ParentAliveCounter++;
             struct packet pkt;
             pkt.type= ALIVE_REQUEST;
@@ -244,11 +261,14 @@ PROCESS_THREAD(getDataProcess, ev, data){
                 //data_pkt.dataOther=10;
             }else{
                 printf("real hardware used\n");
+                tmp102_init();
+                SENSORS_ACTIVATE(battery_sensor);
                 data_pkt.dataTemp= tmp102_read_temp_raw(); //datatemp on 8 bit
-                data_pkt.dataOther=tmp102_read_temp_raw(); //data on 16 bit
+                //data_pkt.dataOther=tmp102_read_temp_raw(); //data on 16 bit
+                data_pkt.dataOther=battery_sensor.value(0);//data on 16 bit
                 //TODO complete for real hardware
             }
-            //TODO Sender mode, periodical and differential
+            //changing modes
             if (mode == DATA_PERIODICALLY){
                 /* Delay 2-4 seconds */
                 //printf("MODE PERIODICALLY ACTIVATED\n");
@@ -260,10 +280,10 @@ PROCESS_THREAD(getDataProcess, ev, data){
             }
             else if (mode == DATA_ON_CHANGE){
                 //printf("MODE DATA ON CHANGE ACTIVATED\n");
-                if (oldDataTemp != data_pkt.dataTemp || oldDataOther != data_pkt.dataOther){
+                if (oldDataTemp != data_pkt.dataTemp || oldDataOther != data_pkt.dataOther){ //if data from previous packet as been changed
                     //printf("DATA ON CHANGE\n");
-                    oldDataTemp=data_pkt.dataTemp;
-                    oldDataOther=data_pkt.dataOther;
+                    oldDataTemp=data_pkt.dataTemp; //previous temp is different
+                    oldDataOther=data_pkt.dataOther; //previous data is different
                     int countTransmission=0;
                     while (runicast_is_transmitting(&runicastConnection) && ++countTransmission<MAX_TRANSMISSION_PACKET){}
                     printf("sent sensor data\n");
