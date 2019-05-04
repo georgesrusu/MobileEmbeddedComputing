@@ -25,7 +25,7 @@ struct data_packet{
     uint16_t nodeSrc;
     uint16_t nodeRank;
     int8_t dataTemp; //allow from -128° to 128°
-    int16_t dataOther;
+    int16_t dataADXL;
 };
 
 //general struct for data aggregation optimization

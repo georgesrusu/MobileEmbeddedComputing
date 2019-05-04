@@ -31,7 +31,7 @@ static int randomSensorData=0; //0 if real hardware, 1 if random
 static uint8_t mode;
 static uint8_t haveSubscriber=0;
 static int8_t oldDataTemp=0;
-static int16_t oldDataOther=0; 
+static int16_t olddataADXL=0; 
 static struct data_packet_aggregate dataPacketAggregate;
 static int packetAggregateCounter=0;
 static int countPacketRunicast=0;
@@ -256,15 +256,15 @@ PROCESS_THREAD(getDataProcess, ev, data){
             data_pkt.nodeRank=rank;
             if (randomSensorData){
                 data_pkt.dataTemp= random_rand()%128; //datatemp on 8 bit
-                data_pkt.dataOther=random_rand()%256; //data on 16 bit
+                data_pkt.dataADXL=random_rand()%256; //data on 16 bit
                 //data_pkt.dataTemp= -26; //datatemp on 8 bit
-                //data_pkt.dataOther=10;
+                //data_pkt.dataADXL=10;
             }else{
                 printf("real hardware used\n");
                 tmp102_init();
                 SENSORS_ACTIVATE(phidgets);
                 data_pkt.dataTemp= tmp102_read_temp_raw(); //datatemp on 8 bit -> Z1 only for Z1
-                data_pkt.dataOther= phidgets.value(PHIDGET5V_1);//data on 16 bit -> Z1 only for Z1
+                data_pkt.dataADXL= phidgets.value(PHIDGET5V_1);//data on 16 bit -> Z1 only for Z1
                 //TODO complete for real hardware
             }
             //changing modes
@@ -279,10 +279,10 @@ PROCESS_THREAD(getDataProcess, ev, data){
             }
             else if (mode == DATA_ON_CHANGE){
                 //printf("MODE DATA ON CHANGE ACTIVATED\n");
-                if (oldDataTemp != data_pkt.dataTemp || oldDataOther != data_pkt.dataOther){ //if data from previous packet as been changed
+                if (oldDataTemp != data_pkt.dataTemp || olddataADXL != data_pkt.dataADXL){ //if data from previous packet as been changed
                     //printf("DATA ON CHANGE\n");
                     oldDataTemp=data_pkt.dataTemp; //previous temp is different
-                    oldDataOther=data_pkt.dataOther; //previous data is different
+                    olddataADXL=data_pkt.dataADXL; //previous data is different
                     int countTransmission=0;
                     while (runicast_is_transmitting(&runicastConnection) && ++countTransmission<MAX_TRANSMISSION_PACKET){}
                     printf("sent sensor data\n");

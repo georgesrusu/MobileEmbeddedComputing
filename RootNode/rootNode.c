@@ -90,16 +90,16 @@ static void runicastReceiver(struct runicast_conn *c, const linkaddr_t *from, ui
         runicast_send(c, from,MAX_TRANSMISSION_PACKET);
     }
     else if(data_pkt->type == SENSOR_DATA){ //receiving data and publish to Gateway
-        printf("DATA,%d,%d,%d\n",data_pkt->nodeSrc,data_pkt->dataTemp,data_pkt->dataOther); //IMPORTANT
+        printf("DATA,%d,%d,%d\n",data_pkt->nodeSrc,data_pkt->dataTemp,data_pkt->dataADXL); //IMPORTANT
     }
     else if (data_pkt_agg->type == SENSOR_DATA_AGGREGATE){ //In case of receiving a data aggregate packet -> need to decompose the two packets
         printf("receivede AGGREGATE PACKET\n");
         printf("received size %d\n",data_pkt_agg->numberPacket);
         if (data_pkt_agg->numberPacket >0){
-            printf("DATA,%d,%d,%d\n",data_pkt_agg->packet1.nodeSrc,data_pkt_agg->packet1.dataTemp,data_pkt_agg->packet1.dataOther); //IMPORTANT for publishing
+            printf("DATA,%d,%d,%d\n",data_pkt_agg->packet1.nodeSrc,data_pkt_agg->packet1.dataTemp,data_pkt_agg->packet1.dataADXL); //IMPORTANT for publishing
         }
         if (data_pkt_agg->numberPacket >1){
-            printf("DATA,%d,%d,%d\n",data_pkt_agg->packet2.nodeSrc,data_pkt_agg->packet2.dataTemp,data_pkt_agg->packet2.dataOther); //IMPORTANT for publishing
+            printf("DATA,%d,%d,%d\n",data_pkt_agg->packet2.nodeSrc,data_pkt_agg->packet2.dataTemp,data_pkt_agg->packet2.dataADXL); //IMPORTANT for publishing
         }
     }
 }

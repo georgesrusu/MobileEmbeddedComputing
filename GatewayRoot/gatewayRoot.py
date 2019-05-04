@@ -34,10 +34,10 @@ def readFromRoot(serial):
         if line[0:4]== b"DATA":
             values=line.decode("utf-8")
             values=values.strip()
-            _,src,tmp,other=values.split(",")
-            print("VALUES src="+str(src)+" tmp="+str(tmp)+" other="+str(other))
+            _,src,tmp,adxl=values.split(",")
+            print("VALUES src="+str(src)+" tmp="+str(tmp)+" adxl="+str(adxl))
             call(["mosquitto_pub","-t","node"+src+"/temperature","-m","Node"+src+" temperature is: "+tmp+" degrees C"])
-            call(["mosquitto_pub","-t","node"+src+"/other","-m","Node"+src+" other is: "+other+" UNIT"])
+            call(["mosquitto_pub","-t","node"+src+"/adxl","-m","Node"+src+" adxl is: "+adxl+" UNIT"])
 
 if __name__=="__main__":
     os.chdir(os.getcwd()+"/../RootNode")
