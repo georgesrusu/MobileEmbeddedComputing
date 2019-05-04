@@ -19,7 +19,7 @@ static struct broadcast_conn broadcastConnection;
 static struct runicast_conn runicastConnection;
 static uint16_t rank=1; //root has rank 1 always, to create the tree
 static uint8_t mode=DATA_PERIODICALLY; //default sending mode
-static uint8_t haveSubscriber=1; //default no subscribers until the gateway is connected
+static uint8_t haveSubscriber=0; //default no subscribers until the gateway is connected
 /*-------------------------------Processes Definition -------------------------------------*/
 PROCESS(broadcastProcess, "Broadcast communications");
 PROCESS(runicastProcess, "Runicast communications");

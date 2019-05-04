@@ -7,22 +7,20 @@
 \usepackage{blindtext}
 \usepackage{enumitem}
 \usepackage{hyperref}
-\usepackage[top=2.5cm,bottom=2.5cm,left=2.5cm,right=2.5cm]{geometry}
+\usepackage[top=2.0cm,bottom=2.0cm,left=2.0cm,right=2.0cm]{geometry}
 \pagestyle{headings}
 \title{Mobile Embedded Group Project}
 \author{Ilias Boulif, Jérémy Bricq, George Rusu}
 \date{\today}
 \begin{document}
 \maketitle
-\tableofcontents
-\newpage
 \section{Introduction}
 
 The aim of this project is to propose an implementation of an IoT network using \textit{Rime} where the sensor data is published through an MQTT-Rime gateway to normal MQTT subscribers. To achieve that we have implemented as requested by the project's statement, a tree-based routing protocol using Rime and an MQTT-Rime gateway.
 
 Firstly, we are going to explain the general structure of our system. Secondly, we are going to present and explain the different messages exchanged in a normal run. Then, we will explain the organization and the routing in our environment. We will speak briefly about our gateway and MQTT subscriber implementation. And finally, we will discuss about the optimizations we managed to implement.
 
-The implementation source code of this project is available at \cite{github}.
+The implementation source code of this project is available in our Github repository which can be accessed using this \href{https://github.com/georgesrusu/MobileEmbeddedComputing}{link}.
 
 
 \section{General structure of our system}
@@ -78,41 +76,65 @@ In our implementation we have 3 packets structures. The node interprets the pack
 \item packet2 : The second packet
 \end{enumerate}
 
-\paragraph{DISCOVERY\_REQUEST}  When a node starts, his rank is equal to 0. The node will start to search for a network, and thus search for a parent to attach to. He will send in broadcast a discovery request to find a parent connected to that network. In order to have this work properly, we define that the root node will always have the same rank which is 1. Even when connected to a parent, the node will still keep sending discovery request in order to search the environment for a better parent, if there is one. The lowest the rank is (except a rank of 0), the nearest the node is to the root.
+\paragraph{DISCOVERY\_REQUEST:}  This message is used when a node starts and his rank is equal to 0. The node will send a broadcast discovery request to find a parent connected to that network. This message is used even when connected to a parent, in order to search the environment for a better parent, if there is one.
 
-\paragraph{DISCOVERY\_RESPONSE} When a node receives a discovery request packet, he will reply with a discovery response containing his rank in unicast. The node that has made the request receive now the response, checks the received rank (parent+1) and if better than his cur according to the received rank, change or not assign the his rank the value of the rank of his parent + 1.
+\paragraph{DISCOVERY\_RESPONSE:} After receiving a discovery request, this message will be used to respond in unicast. 
 
-\paragraph{ALIVE\_REQUEST} Each node has to keep sending an alive request in order to know if his parent is still available in the network. After 4 alive requests without any response, the child considers that he has no parent. If he has no more parent, his rank return back to 0 and he has to research for a new one. 
+\paragraph{ALIVE\_REQUEST:} Once a node has its parent, he will use alive request to continuously ping his parent in order see if he is still there.
 
-\paragraph{ALIVE\_RESPONSE } When a node receives an alive request, he has to replies with an alive response to his child to validate his presence. Each alive response is accompanied with the rank of the parent. In this way, if the parent is disconnected from the network (rank = 0), the child can also put his rank to 0 and can disconnect. 
+\paragraph{ALIVE\_RESPONSE:} When a node receives an alive request, he has to reply with an alive response to his child to validate his presence. 
 
-\paragraph{SENSOR\_DATA } A sensor data packet is a packet that contains some information collected by the sensor. This packet travels from his sensor to the subscribers by going forwarded by the nodes on the path to the root.
+\paragraph{SENSOR\_DATA:} This message is used for sending sensors data. 
 
-\paragraph{SENSOR\_DATA\_AGGREGATE } A sensor data aggregate packet is a packet that contains many sensors data packets in one. This packet will be explained in details in the Section \ref{opti} : Optimizations.
-
-
-
-
+\paragraph{SENSOR\_DATA\_AGGREGATE:} A sensor data aggregate packet is a packet that contains 2 sensors data packets. This has been implemented as one of our optimization.
 
 \section{Network organization and routing}
 \label{routing}
+In order to explain more easily the network organization, let us define the root node as a parent and the sensor as a child. We should note that each sensor will also be a parent at his turn for his children except the root which will only be parent (tree structure).
+
+So let us start from the beginning when the mote network is empty and the root/parent is started and is waiting for messages. Once the first sensor/child is up and running, he will start to search for a network, and thus search for a parent to attach to. He will send using the broadcast channel a discovery request to find a parent. In order to have this working properly, we define that the root node will always have the same rank which is 1 (no other node is allowed to have a rank of 1). When the root/parent receives a discovery request packet, he will reply with a discovery response containing his rank in unicast. The node/child that has made the request receive now the response, checks the received rank (parent+1) and if better than his actual rank, he will change or not his parent and hence his rank. This first message exchange is illustrated in Figure \ref{fig:bd}. We should note that even when connected to a parent, the child will still keep sending discovery request in order to search the environment for a better parent, if there is one. The lowest the rank is (except a rank of 0), the nearest the node is to the root (root's rank=1).\\
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.6]{./img/discovery.png}
+\caption{First communications between nodes.}
+\label{fig:bd}
+\end{figure}
+
+Once the child got his parent, the alive exchange is starting. This is illustrated in Figure \ref{fig:alive}. The child will create an alive request packet and send it to his new parent. The child will also start counting the number of alive request packet send without response. So for example after having sent 4 times an alive request packet and not having receive any reply from the parent, the child will reset his parent and start looking again for a new parent. This allow our network to self-rearrange when a node is moved or deleted. However this is time consuming, we need time for our system to converge to a desired state. Back to our alive message exchange, when the Parent receive an alive request, he will reply with an alive response to validate his presence. The message is containing the rank, the mode of data transmission desired and the number of MQTT subscribers (we will come back to those later in this document).\\
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.6]{./img/alive.png}
+\caption{Keep alive communication between child and parent.}
+\label{fig:alive}
+\end{figure}
+
+After having received the first alive responce from his parent, the child will use the contained information (mode \& subscriber) to start pushing data toward the root of the tree. For that the node will create a sensor data packet and send it to his parent. When his parent will receive the sensor data packet, he will try to aggregate the packet in a sensor data aggregate packet in order to decrease the number of transmitted message toward the root. This will also be explained in more details in Section \ref{opti}.
 
 \section{Gateway}
 \label{gateway}
+
+Once the sensor data arrive at the top of the tree, the root node has to forward it to the gateway in order to be published in the MQTT-broker. In order for this to work, we decided to implement the time gateway using Python3. Regarding the communication between the root node and the gateway, we used the Cooja's plugin \emph{serial2pty} to create a serial communication between them. Bsically what it happening, when the root receive a data, he is going to print the data on the serial while the gateway will continuously be reading that serial. When a data is read, the gateway will make a call to the API of the Mosquitto Broker in order to publish the received data according to the related topic, either temperature or acceleration (ADXL). As asked in the assignement, the gateway should act as a management console for the air network (sensors). So we managed to run the gateway in such a way (involving threading) that it accept input at any time. The input is either 0 or 1 and is for the sending mode of the data. We defined the 0 as the DATA\_ON\_CHANGE and we defined 1 for the mode DATA\_PERIODICALLY. We also defined a default mode which is 1. Thus using our console allows to change the mode from 0 to 1 or vice-versa and unlimited times without having to stop and relauch the gateway. The mode propagation will be explained in Section \ref{opti} when we will speak about the first optimization (subscribers).
+
+
 \section{MQTT-Subscriber}
 \label{subscriber}
+In order to be able to test our MQTT broker and the data being published, we decided to implement a simple MQTT subscriber that is taking as command line argument the topics, if none, then all topics, and will subscriber to the given topics in the MQTT broket. 
+
+
 \section{Optimizations}
 \label{opti}
+In this project, we implemented the requested optimizations but also we tried to design our network to be as much efficient as possible.  So let us start by explaining the requested optimizations.
+
+The first asked optimizations was that the sensors nodes should not send any data if there is no subscriber. We managed to implement this using the alive communications, a default value and the trick given in the project assignement. So basicaly what we are doing is that by default there are no subscriber. Our gateway has subscribed to the MQTT topic \emph{SYS/broker/clients/active}. We should note that here the subscriber number 1 is the gateway so we are only interested when the number of subscriber is $\geq 2$. When a real subscriber (using our MQTT-subscriber.py script) is actif, the gateway receive the number of active clients, if the number is greater or equal to 2 we forward it to the root node which is changing the default subscriber value from 0 to 2. The subscriber will be forwarded towards the leafs of the tree using the alive packets. Remember that earlier in this document we spoke about the alive\_response packet and that it contains a variable related to the number of subscriber and mode. Well this is the trick. Using alive response messages (from parents to children) we are not only checking the parent presence but also propagating configuration messages to sensor nodes. And this is how we managed to propagate mode and subscriber configuration. 
+
+The second asked optimizations was to aggregate data packets. For that optimization we created the sensor data aggregate packets which is basically a bigger packet than can contain up to 2 data packet. So when a node receive a sensor data, he will create an aggregate packet and wait as long as 2 runicast packets are received. If before that time, the packet aggregate is full, meaining that in the meantime another sensor data packet has been received, the node will immediately send the  aggregated packet toward the root. On the other side, if after that time,  the packet aggregate has not been filled, the packet will be send half-full. And this is leading us to another optimization: we are aggregating half-full packet. If an aggregate packet is sent half-empty, the next node on the path to the root, will take the paquet, look at the number of packet aggregated into (remember the numberPacket field in the struct) and if it is equal to 1 (only 1 paquet, half-empty) add if available a sensor data packet. The goal is that no aggregate packet will arrive at the root half-full. 
+
+And finally, the biggest optimization I think is that we managed to have the least message structures, the least message types and of course the least message exchange. This can clearly be observerd: we used the same struck of packet for the discovery and alive communication. Also, we discovered during the testing phase of our prototype that the more messages are exchange the more transmissions errors we got (runicast retransmissions, runicast timeout) and this is why we tried to have the lowest number of message transiting throught the network but some messages cannot just be suppressed.
 
 \section{Conclusion}
 
-\begin{thebibliography}{9}
+As a conclusion, we can say that developping such an IOT network is clearly not an easy task. Firstly it require using a low level machine language which in our case is C and which make use of pointers (easy to get lost into ). Secondly, as the root node and sensor node are based on threads sometimes debugging can be difficult: chronological order of events are not always as expected. Thirdly, because of that, the systems need time in order to converge into the desired state. In the end, it has been a great introduction into the IOT world !
 
-\bibitem{github}
-Github repository,
-\textit{MobileEmbeddedComputing}, Available at :
-\url{https://github.com/georgesrusu/MobileEmbeddedComputing}.
-
-
-\end{thebibliography}
 \end{document}

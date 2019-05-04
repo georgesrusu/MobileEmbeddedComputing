@@ -5,14 +5,14 @@
 \contentsline {paragraph}{Description of \textit {packet}}{3}{section*.2}
 \contentsline {paragraph}{Description of \textit {data\_packet} }{3}{section*.3}
 \contentsline {paragraph}{Description of \textit {data\_packet\_aggregate} }{3}{section*.4}
-\contentsline {paragraph}{DISCOVERY\_REQUEST}{3}{section*.5}
-\contentsline {paragraph}{DISCOVERY\_RESPONSE}{3}{section*.6}
-\contentsline {paragraph}{ALIVE\_REQUEST}{3}{section*.7}
-\contentsline {paragraph}{ALIVE\_RESPONSE }{4}{section*.8}
-\contentsline {paragraph}{SENSOR\_DATA }{4}{section*.9}
-\contentsline {paragraph}{SENSOR\_DATA\_AGGREGATE }{4}{section*.10}
+\contentsline {paragraph}{DISCOVERY\_REQUEST:}{3}{section*.5}
+\contentsline {paragraph}{DISCOVERY\_RESPONSE:}{3}{section*.6}
+\contentsline {paragraph}{ALIVE\_REQUEST:}{3}{section*.7}
+\contentsline {paragraph}{ALIVE\_RESPONSE:}{3}{section*.8}
+\contentsline {paragraph}{SENSOR\_DATA:}{3}{section*.9}
+\contentsline {paragraph}{SENSOR\_DATA\_AGGREGATE:}{4}{section*.10}
 \contentsline {section}{\numberline {4}Network organization and routing}{4}{section.4}
-\contentsline {section}{\numberline {5}Gateway}{4}{section.5}
-\contentsline {section}{\numberline {6}MQTT-Subscriber}{4}{section.6}
-\contentsline {section}{\numberline {7}Optimizations}{4}{section.7}
-\contentsline {section}{\numberline {8}Conclusion}{4}{section.8}
+\contentsline {section}{\numberline {5}Gateway}{5}{section.5}
+\contentsline {section}{\numberline {6}MQTT-Subscriber}{5}{section.6}
+\contentsline {section}{\numberline {7}Optimizations}{5}{section.7}
+\contentsline {section}{\numberline {8}Conclusion}{5}{section.8}
