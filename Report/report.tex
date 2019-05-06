@@ -56,7 +56,7 @@ In our implementation we have 3 packets structures. The node interprets the pack
 \item Type : [DISCOVERY\_REQUEST, DISCOVERY\_RESPONSE, ALIVE\_REQUEST, ALIVE\_RESPONSE]
 \item Rank : The rank of the transmitting node
 \item Mode : The sent mode [DATA\_ON\_CHANGE, DATA\_PERIODICALLY] - by default, data periodically 
-\item HaveSubscriber : Boolean that indicates if someone is subscribed to some topics
+\item HaveSubscriber : Number of actives subscribers in the MQTT broker.
 \end{enumerate}
 
 \paragraph{Description of \textit{data\_packet} }
