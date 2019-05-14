@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.12.12)  6 MAY 2019 14:52
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2018.3.27)  14 MAY 2019 20:29
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -721,7 +721,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 95--96
 
  []
 
-<./img/discovery.png, id=83, 333.245pt x 191.71625pt>
+<./img/discovery.png, id=84, 333.245pt x 191.71625pt>
 File: ./img/discovery.png Graphic file (type png)
 
 <use ./img/discovery.png>
@@ -732,7 +732,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 104--105
 
  []
 
-<./img/alive.png, id=85, 323.2075pt x 191.71625pt>
+<./img/alive.png, id=86, 323.2075pt x 191.71625pt>
 File: ./img/alive.png Graphic file (type png)
  <use ./img/alive.png>
 Package pdftex.def Info: ./img/alive.png used on input line 108.
@@ -748,25 +748,30 @@ Underfull \hbox (badness 10000) in paragraph at lines 130--131
 
  []
 
+
+Underfull \hbox (badness 10000) in paragraph at lines 132--133
+
+ []
+
 [4 <./img/alive.png>]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 140.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 141.
  [5]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 140.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 141.
  (./report.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 140.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 140.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 141.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 141.
 Package rerunfilecheck Info: File `report.out' has not changed.
 (rerunfilecheck)             Checksum: 2D768B9701A6CAC61856B05EA11AEF21;414.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 140.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 141.
  ) 
 Here is how much of TeX's memory you used:
  8096 strings out of 494437
- 118121 string characters out of 6166644
+ 118121 string characters out of 6166645
  229954 words of memory out of 5000000
  11321 multiletter control sequences out of 15000+600000
  8646 words of font info for 30 fonts, out of 8000000 for 9000
  319 hyphenation exceptions out of 8191
- 28i,7n,32p,1763b,336s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 28i,7n,32p,1912b,336s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2017basic/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx1
 0.pfb></usr/local/texlive/2017basic/texmf-dist/fonts/type1/public/amsfonts/cm/c
 mbx12.pfb></usr/local/texlive/2017basic/texmf-dist/fonts/type1/public/amsfonts/
@@ -777,10 +782,10 @@ ic/amsfonts/cm/cmr17.pfb></usr/local/texlive/2017basic/texmf-dist/fonts/type1/p
 ublic/amsfonts/cm/cmsl10.pfb></usr/local/texlive/2017basic/texmf-dist/fonts/typ
 e1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2017basic/texmf-dist/fonts
 /type1/public/amsfonts/cm/cmti10.pfb>
-Output written on report.pdf (5 pages, 170074 bytes).
+Output written on report.pdf (5 pages, 170677 bytes).
 PDF statistics:
- 150 PDF objects out of 1000 (max. 8388607)
- 126 compressed objects within 2 object streams
+ 151 PDF objects out of 1000 (max. 8388607)
+ 127 compressed objects within 2 object streams
  39 named destinations out of 1000 (max. 500000)
  80 words of extra memory for PDF output out of 10000 (max. 10000000)
 
